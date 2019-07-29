@@ -4,7 +4,7 @@
 
 ```
 git clone git@github.com:RedHat-EMEA-SSA-Team/service-mesh.git
-cd acicrome
+cd service-mesh
 ```
 
 Under manifests files *istio-operator.yml* and *istio.yml* point to upstream community images and files *servicemesh-operator.yml* and *servicemesh.yml* to RHEL 8 based Red Hat Service Mesh.
