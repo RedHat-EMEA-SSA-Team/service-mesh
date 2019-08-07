@@ -9,19 +9,39 @@ cd service-mesh
 
 Under manifests files *istio-operator.yml* and *istio.yml* point to upstream community images and files *servicemesh-operator.yml* and *servicemesh.yml* to RHEL 8 based Red Hat Service Mesh.
 
-## Deploy Istio operator
+## Install Kiali Operator
 
+```
+bash <(curl -L https://git.io/getLatestKialiOperator) --operator-image-version v1.0.0 --operator-watch-namespace '**' --accessible-namespaces '**' --operator-install-kiali false
+```
+
+
+## Installa Jeager Operator
+
+```
+oc new-project observability # create the project for the jaeger operator
+oc create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/v1.13.1/deploy/crds/jaegertracing_v1_jaeger_crd.yaml
+oc create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/v1.13.1/deploy/service_account.yaml
+oc create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/v1.13.1/deploy/role.yaml
+oc create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/v1.13.1/deploy/role_binding.yaml
+oc create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/v1.13.1/deploy/operator.yaml
+```
+
+## Deploy Istio operator
 
 
 ```
 oc new-project istio-operator
-oc apply -f manifests/istio-operator.yaml -n istio-operator
+oc apply -n istio-operator -f https://raw.githubusercontent.com/Maistra/istio-operator/maistra-0.12/deploy/maistra-operator.yaml
 ```
 
 ## Deploy Istio control plane
+
+Multitenancy is enabled by default in TP12.
+
 ```
 oc new-project istio-system
-oc apply -f manifests/istio.yml -n istio-system
+oc apply -f manifests/servicemesh.yml -n istio-system
 ```
 
 ## Deploy book info application
@@ -69,5 +89,15 @@ oc apply -n $BOOKINFO_PROJECT -f rules/vs-fault-injection-delay.yml
 
 
 ```
-oc delete project istio-system istio-operator
+oc delete smcp -n istio-system full-install
+oc delete project istio-system
+bash <(curl -L https://git.io/getLatestKialiOperator) --uninstall-mode true
+oc delete -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/v1.13.1/deploy/crds/jaegertracing_v1_jaeger_crd.yaml
+oc delete -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/v1.13.1/deploy/service_account.yaml
+oc delete -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/v1.13.1/deploy/role.yaml
+oc delete -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/v1.13.1/deploy/role_binding.yaml
+oc delete -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/v1.13.1/deploy/operator.yaml
+oc delete project observability
+oc delete -n istio-operator -f https://raw.githubusercontent.com/Maistra/istio-operator/maistra-0.12/deploy/maistra-operator.yaml
+oc delete project istio-operator
 ```
