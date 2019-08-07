@@ -52,7 +52,7 @@ spec:
     tracing:
       enabled: true
 
-    multitenant: false
+    multitenant: true
 ---
 apiVersion: maistra.io/v1
 kind: ServiceMeshMemberRoll
